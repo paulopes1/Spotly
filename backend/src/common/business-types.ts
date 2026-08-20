@@ -45,8 +45,10 @@ export const BUSINESS_PROFILES: BusinessProfile[] = [
     keywords: ['academia', 'crossfit', 'box de crossfit', 'estúdio de pilates', 'pilates', 'fitness', 'musculação', 'yoga'],
     competitorCategory: 'academia',
     // Academia é negócio de destino: as pessoas vão até ela. Fluxo de calçada
-    // pesa menos; concorrência direta e adequação do imóvel/orçamento pesam mais.
-    weights: { footTraffic: 0.15, competition: 0.3, income: 0.2, anchors: 0.1, budget: 0.25 },
+    // pesa menos que concorrência/orçamento, mas ainda importa mais do que um
+    // negócio 100% de destino puro — calibrado com feedback de mercado em
+    // 2026-08 (fluxo 15%→20%, tirado da concorrência 30%→25%).
+    weights: { footTraffic: 0.2, competition: 0.25, income: 0.2, anchors: 0.1, budget: 0.25 },
     idealIncomeIndex: 70,
     incomeSigma: 25,
     anchorKeywords: ['metrô', 'estação', 'faculdade', 'universidade', 'colégio', 'escritório', 'corporativ', 'parque'],
