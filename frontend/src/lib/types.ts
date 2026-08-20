@@ -69,6 +69,56 @@ export interface DashboardResponse {
   }>;
 }
 
+export type UrbanProjectType = 'metro' | 'hospital' | 'escola';
+export type UrbanProjectStatus = 'em_obras' | 'planejado' | 'recem_inaugurado';
+
+export interface UrbanProjectDto {
+  id: string;
+  name: string;
+  type: UrbanProjectType;
+  neighborhood: string;
+  lat: number;
+  lng: number;
+  status: UrbanProjectStatus;
+  year: number;
+  description: string;
+  sourceName: string;
+  sourceUrl: string;
+  distanceKm: number;
+  apiVerified: boolean;
+}
+
+export interface NeighborhoodAppreciationDto {
+  neighborhood: string;
+  lat: number;
+  lng: number;
+  score: number;
+  projects: UrbanProjectDto[];
+}
+
+export interface AppreciationResponse {
+  neighborhoods: NeighborhoodAppreciationDto[];
+  metroApiOk: boolean;
+}
+
+export const URBAN_PROJECT_TYPE_LABELS: Record<UrbanProjectType, string> = {
+  metro: 'Metrô/Trem',
+  hospital: 'Saúde',
+  escola: 'Educação',
+};
+
+export const URBAN_PROJECT_TYPE_ICONS: Record<UrbanProjectType, string> = {
+  metro: 'train',
+  hospital: 'local_hospital',
+  escola: 'school',
+};
+
+export const URBAN_PROJECT_STATUS_LABELS: Record<UrbanProjectStatus, string> = {
+  em_obras: 'Em obras',
+  planejado: 'Planejado',
+  recem_inaugurado: 'Recém-inaugurado',
+};
+
 export const PROPERTY_TYPE_LABELS: Record<string, string> = {
   loja_rua: 'Loja de Rua',
   loja_galeria: 'Loja de Galeria',

@@ -62,6 +62,15 @@ const RAW_CENTROIDS: Record<string, LatLng> = {
   'granja julieta': { lat: -23.633, lng: -46.7 },
   'santo amaro': { lat: -23.654, lng: -46.71 },
   'centro': { lat: -23.55, lng: -46.633 },
+  // Adicionados para cobrir bairros das zonas leste/norte/sul mais
+  // periféricas, citados nos projetos urbanos do indicador de valorização
+  // (2026-08) — também passam a ser reconhecíveis na busca de imóveis.
+  'jabaquara': { lat: -23.646, lng: -46.643 },
+  'pirituba': { lat: -23.48, lng: -46.716 },
+  'sapopemba': { lat: -23.586, lng: -46.503 },
+  'grajau': { lat: -23.745, lng: -46.698 },
+  'cidade ademar': { lat: -23.68, lng: -46.67 },
+  'tremembe': { lat: -23.451, lng: -46.616 },
 };
 
 /**
@@ -78,7 +87,8 @@ export const SP_NEIGHBORHOOD_NAMES = [
   'Bela Vista', 'Liberdade', 'Santana', 'Lapa', 'Vila Leopoldina', 'Ipiranga', 'Saúde',
   'Vila Nova Conceição', 'Chácara Klabin', 'Paraíso', 'Pompeia', 'Barra Funda',
   'Água Branca', 'Bom Retiro', 'Cerqueira César', 'Real Parque', 'Vila Andrade',
-  'Granja Julieta', 'Santo Amaro', 'Centro',
+  'Granja Julieta', 'Santo Amaro', 'Centro', 'Jabaquara', 'Pirituba', 'Sapopemba',
+  'Grajaú', 'Cidade Ademar', 'Tremembé',
 ];
 
 function normalize(s: string): string {

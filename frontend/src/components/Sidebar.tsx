@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/auth-context';
  * Sidebar fixa de 256px usada nas telas de resultados e dashboard —
  * estrutura e classes fiéis ao HTML do Stitch.
  */
-export function Sidebar({ active }: { active: 'dashboard' | 'map' }) {
+export function Sidebar({ active }: { active: 'dashboard' | 'map' | 'valorizacao' }) {
   const { user, logout } = useAuth();
   const router = useRouter();
 
@@ -38,10 +38,10 @@ export function Sidebar({ active }: { active: 'dashboard' | 'map' }) {
           <span className={`material-symbols-outlined mr-3 ${active === 'map' ? 'fill' : ''}`}>map</span>
           Nova Busca
         </Link>
-        <span className={`${itemBase} opacity-50 cursor-not-allowed`}>
-          <span className="material-symbols-outlined mr-3">insights</span>
-          Analytics
-        </span>
+        <Link href="/valorizacao" className={active === 'valorizacao' ? itemActive : itemBase}>
+          <span className={`material-symbols-outlined mr-3 ${active === 'valorizacao' ? 'fill' : ''}`}>insights</span>
+          Valorização
+        </Link>
         <span className={`${itemBase} opacity-50 cursor-not-allowed`}>
           <span className="material-symbols-outlined mr-3">favorite</span>
           Imóveis Salvos

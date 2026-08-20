@@ -32,6 +32,12 @@ export function TopNav() {
           >
             Dashboard
           </Link>
+          <Link
+            href="/valorizacao"
+            className="text-label-md text-on-surface-variant hover:text-primary hover:bg-secondary-container/10 transition-all duration-300 rounded-lg px-2 py-1"
+          >
+            Valorização
+          </Link>
           <a
             href="#como-funciona"
             className="text-label-md text-on-surface-variant hover:text-primary hover:bg-secondary-container/10 transition-all duration-300 rounded-lg px-2 py-1"
