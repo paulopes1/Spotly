@@ -11,6 +11,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
 import { SearchResult } from './entities/search-result.entity';
 import { Search } from './entities/search.entity';
 import { User } from './entities/user.entity';
+import { fetchPropertyImagesByType } from './property-images';
 import { SEED_PROPERTIES } from './seed-data';
 
 const img = (seed: string) => `https://picsum.photos/seed/spotly-${seed}/800/600`;
@@ -29,6 +30,18 @@ async function main() {
   await ds.getRepository(Search).createQueryBuilder().delete().execute();
   await ds.getRepository(Property).createQueryBuilder().delete().execute();
 
+  // Fotos reais por tipo de imóvel (Pexels) — mapa vazio se a chave não
+  // estiver configurada, e nesse caso cada imóvel cai no placeholder abaixo.
+  const imagesByType = await fetchPropertyImagesByType();
+  const usedCount: Record<string, number> = {};
+  const imageFor = (i: number, propertyType: string): string => {
+    const pool = imagesByType[propertyType];
+    if (!pool || pool.length === 0) return img(String(i + 1));
+    const idx = (usedCount[propertyType] ?? 0) % pool.length;
+    usedCount[propertyType] = idx + 1;
+    return pool[idx];
+  };
+
   const repo = ds.getRepository(Property);
   for (const [i, p] of SEED_PROPERTIES.entries()) {
     await repo.save(
@@ -36,7 +49,7 @@ async function main() {
         ...p,
         city: 'São Paulo',
         state: 'SP',
-        imageUrl: img(String(i + 1)),
+        imageUrl: imageFor(i, p.propertyType),
       }),
     );
   }
