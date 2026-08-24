@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { DashboardCharts } from '@/components/DashboardCharts';
 import { Sidebar } from '@/components/Sidebar';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
@@ -167,6 +168,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Gráficos — só fazem sentido depois da primeira busca; sem
+                  histórico o card de estado vazio abaixo já orienta o usuário. */}
+              {hasSearches && <DashboardCharts history={data.history} />}
 
               {/* Histórico de buscas */}
               <div
