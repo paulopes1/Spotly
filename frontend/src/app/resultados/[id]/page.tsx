@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { FormEvent, useEffect, useState } from 'react';
 import { MobileNav, Sidebar } from '@/components/Sidebar';
 import { PropertyCard } from '@/components/PropertyCard';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
 import { SearchResponse, formatBRL } from '@/lib/types';
 
 // Mapa só no cliente (Mapbox/MapLibre dependem de window)
@@ -21,13 +22,22 @@ const MapPanel = dynamic(() => import('@/components/MapPanel').then((m) => m.Map
 export default function ResultsPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [search, setSearch] = useState<SearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newQuery, setNewQuery] = useState('');
   const [searching, setSearching] = useState(false);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
+  // Espera o refresh silencioso da sessão terminar antes de buscar — numa
+  // navegação "dura" (URL digitada, link externo, F5) o access token começa
+  // vazio na memória; buscar antes do refresh resolver faz uma busca PRIVADA
+  // (dona logada) ser tratada como anônima e voltar 404 mesmo com sessão
+  // válida. Buscas anônimas continuam funcionando normalmente: authLoading
+  // também vira false rápido pra quem não tem sessão nenhuma.
   useEffect(() => {
+    if (authLoading) return;
     api<SearchResponse>(`/search/${id}`)
       .then((s) => {
         setSearch(s);
@@ -35,7 +45,51 @@ export default function ResultsPage() {
         setSelectedId(s.results[0]?.id ?? null);
       })
       .catch((e) => setError(e instanceof Error ? e.message : 'Busca não encontrada.'));
-  }, [id]);
+  }, [id, authLoading]);
+
+  // Corações preenchidos: só faz sentido pra quem está logado.
+  useEffect(() => {
+    if (!user) {
+      setSavedIds(new Set());
+      return;
+    }
+    api<string[]>('/me/saved-properties/ids')
+      .then((ids) => setSavedIds(new Set(ids)))
+      .catch(() => {
+        /* silencioso — o coração só fica sem preencher se isso falhar */
+      });
+  }, [user]);
+
+  async function toggleSave(propertyId: string) {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    const wasSaved = savedIds.has(propertyId);
+    // Otimista: atualiza a UI antes da resposta do servidor.
+    setSavedIds((prev) => {
+      const next = new Set(prev);
+      if (wasSaved) next.delete(propertyId);
+      else next.add(propertyId);
+      return next;
+    });
+    try {
+      if (wasSaved) {
+        await api(`/me/saved-properties/${propertyId}`, { method: 'DELETE' });
+      } else {
+        await api('/me/saved-properties', { method: 'POST', body: JSON.stringify({ propertyId }) });
+      }
+    } catch (e) {
+      // Reverte em caso de falha (ex.: sessão expirou no meio do caminho).
+      setSavedIds((prev) => {
+        const next = new Set(prev);
+        if (wasSaved) next.add(propertyId);
+        else next.delete(propertyId);
+        return next;
+      });
+      if (e instanceof ApiError && e.status === 401) router.push('/login');
+    }
+  }
 
   async function handleNewSearch(e: FormEvent) {
     e.preventDefault();
@@ -218,6 +272,8 @@ export default function ResultsPage() {
                     rank={i}
                     selected={r.id === selectedId}
                     onSelect={() => setSelectedId(r.id)}
+                    saved={savedIds.has(r.property.id)}
+                    onToggleSave={() => toggleSave(r.property.id)}
                   />
                 ))}
               <div className="h-8" />

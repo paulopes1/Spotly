@@ -49,6 +49,12 @@ export interface UserDto {
   name: string;
 }
 
+export interface SavedPropertyDto {
+  id: string;
+  savedAt: string;
+  property: PropertyDto;
+}
+
 export interface DashboardResponse {
   user: UserDto & { createdAt: string };
   stats: {

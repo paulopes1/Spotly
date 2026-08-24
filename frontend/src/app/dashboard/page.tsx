@@ -150,7 +150,7 @@ export default function DashboardPage() {
                         { icon: 'add_location_alt', label: 'Nova Busca', href: '/' },
                         { icon: 'history', label: 'Histórico', href: '#historico' },
                         { icon: 'tune', label: 'Preferências', href: '#' },
-                        { icon: 'share', label: 'Compartilhar', href: '#' },
+                        { icon: 'favorite', label: 'Imóveis Salvos', href: '/salvos' },
                       ].map((a) => (
                         <Link
                           key={a.label}

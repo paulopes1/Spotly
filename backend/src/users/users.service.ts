@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { findProfile } from '../common/business-types';
+import { Property } from '../database/entities/property.entity';
+import { SavedProperty } from '../database/entities/saved-property.entity';
 import { Search } from '../database/entities/search.entity';
 import { SearchResult } from '../database/entities/search-result.entity';
 import { User } from '../database/entities/user.entity';
@@ -12,6 +14,8 @@ export class UsersService {
     @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(Search) private readonly searches: Repository<Search>,
     @InjectRepository(SearchResult) private readonly results: Repository<SearchResult>,
+    @InjectRepository(SavedProperty) private readonly saved: Repository<SavedProperty>,
+    @InjectRepository(Property) private readonly properties: Repository<Property>,
   ) {}
 
   async getProfile(userId: string) {
@@ -77,5 +81,56 @@ export class UsersService {
         };
       }),
     };
+  }
+
+  // ── Imóveis salvos ────────────────────────────────────────────────
+
+  /** Lista completa (tela "Imóveis Salvos"): dados do imóvel + quando foi salvo. */
+  async listSaved(userId: string) {
+    const rows = await this.saved.find({
+      where: { userId },
+      relations: { property: true },
+      order: { createdAt: 'DESC' },
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      savedAt: r.createdAt,
+      property: {
+        id: r.property.id,
+        title: r.property.title,
+        address: r.property.address,
+        neighborhood: r.property.neighborhood,
+        city: r.property.city,
+        lat: r.property.lat,
+        lng: r.property.lng,
+        rentPrice: r.property.rentPrice,
+        areaM2: r.property.areaM2,
+        propertyType: r.property.propertyType,
+        imageUrl: r.property.imageUrl,
+        description: r.property.description,
+      },
+    }));
+  }
+
+  /** Só os IDs (usado nas telas de busca/resultados pra saber quais corações preencher). */
+  async listSavedIds(userId: string): Promise<string[]> {
+    const rows = await this.saved.find({ where: { userId }, select: { propertyId: true } });
+    return rows.map((r) => r.propertyId);
+  }
+
+  /** Idempotente: salvar de novo um imóvel já salvo não duplica nem dá erro. */
+  async saveProperty(userId: string, propertyId: string) {
+    const existing = await this.saved.findOne({ where: { userId, propertyId } });
+    if (existing) return { id: existing.id, savedAt: existing.createdAt };
+
+    const property = await this.properties.findOne({ where: { id: propertyId } });
+    if (!property) throw new NotFoundException('Imóvel não encontrado.');
+
+    const row = await this.saved.save(this.saved.create({ userId, propertyId }));
+    return { id: row.id, savedAt: row.createdAt };
+  }
+
+  async unsaveProperty(userId: string, propertyId: string): Promise<void> {
+    await this.saved.delete({ userId, propertyId });
   }
 }

@@ -14,11 +14,16 @@ export function PropertyCard({
   rank,
   selected,
   onSelect,
+  saved,
+  onToggleSave,
 }: {
   result: SearchResultDto;
   rank: number;
   selected: boolean;
   onSelect: () => void;
+  /** Omitir esconde o botão de salvar (usado em contextos sem essa ação). */
+  saved?: boolean;
+  onToggleSave?: () => void;
 }) {
   const [expanded, setExpanded] = useState(rank === 0); // top match abre expandido
   const p = result.property;
@@ -45,6 +50,23 @@ export function PropertyCard({
           <div className="absolute top-4 left-4 bg-coral text-white px-3 py-1 rounded-full text-label-sm shadow-md flex items-center gap-1">
             <span className="material-symbols-outlined text-[16px]">verified</span> Top Match
           </div>
+        )}
+        {onToggleSave && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSave();
+            }}
+            aria-label={saved ? 'Remover dos salvos' : 'Salvar imóvel'}
+            aria-pressed={saved}
+            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-sm hover:scale-105 transition-transform"
+          >
+            <span
+              className={`material-symbols-outlined text-[20px] ${saved ? 'text-coral icon-fill' : 'text-on-surface-variant'}`}
+            >
+              favorite
+            </span>
+          </button>
         )}
         <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-label-sm text-on-surface-variant shadow-sm">
           {PROPERTY_TYPE_LABELS[p.propertyType] ?? p.propertyType} • {p.areaM2}m²
